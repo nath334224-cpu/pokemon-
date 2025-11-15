@@ -17,6 +17,7 @@
         <button onclick="addPokemon()">Add a Pokemon</button>
         <button onclick="addPokedexEntry()">Add Pokedex Entry</button>
 <script>
+    let crySound = new Audio();
     function showfact() {
         alert("Kleavor is a Bug/Rock type Pokemon introduced in Generation 8. It evolves from Scyther when exposed to a Black Augurite.");
     }
@@ -26,8 +27,9 @@
         img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png",
         type: "Electric",
         number: 25,
+        cry: "https://play.pokemonshowdown.com/audio/cries/pikachu.mp3",
         description: "Pikachu that can generate powerful electricity have cheek sacs that are extra soft and super stretchy.",
-        evolutions: ["Pichu", "Raichu"],
+        evolutions: ["Pichu", "Pikachu", "Raichu"],
         stats: { hp: 35, attack: 55, defense: 40, speed: 90 }
     },
     {
@@ -35,6 +37,7 @@
         img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png",
         type: "Fire/Flying",
         number: 6,
+        cry: "https://play.pokemonshowdown.com/audio/cries/charizard.mp3",
         description: "Charizard flies around the sky in search of powerful opponents. It breathes fire of such great heat that it melts anything.",
         evolutions: ["Charmander", "Charmeleon", "Charizard"],
         stats: { hp: 78, attack: 84, defense: 78, speed: 100 }
@@ -44,6 +47,7 @@
         img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
         type: "Grass/Poison",
         number: 1,
+        cry: "https://play.pokemonshowdown.com/audio/cries/bulbasaur.mp3",
         description: "Bulbasaur can be seen napping in bright sunlight. There is a seed on its back. By soaking up the sun's rays, the seed grows progressively larger.",
         evolutions: ["Bulbasaur", "Ivysaur", "Venusaur"],
         stats: { hp: 45, attack: 49, defense: 49, speed: 45 }
@@ -53,6 +57,7 @@
         img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/390.png",
         type: "Fire",
         number: 390,
+        cry: "https://play.pokemonshowdown.com/audio/cries/chimchar.mp3",
         description: "The flame that burns at the tip of its tail is an indication of its emotions. The flame wavers when Chimchar is enjoying itself. If the Pokémon becomes enraged, the flame burns fiercely.",
         evolutions: ["Chimchar", "Monferno", "Infernape"],
         stats: { hp: 44, attack: 58, defense: 44, speed: 61 }
@@ -62,8 +67,9 @@
         img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/123.png",
         type: "Bug/Flying",
         number: 123,
+        cry: "https://play.pokemonshowdown.com/audio/cries/scyther.mp3",
         description: "Scyther is blindingly fast. It can slice through thick tree trunks in a single swing of its scythes. It is very territorial.",
-        evolutions: ["Scyther", "Kleavor"],
+        evolutions: ["Scyther", "Scizor"],
         stats: { hp: 70, attack: 110, defense: 80, speed: 105 }
     },
     {
@@ -71,6 +77,7 @@
         img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/900.png",
         type: "Bug/Rock",
         number: 900,
+        cry: "https://play.pokemonshowdown.com/audio/cries/kleavor.mp3",
         description: "Kleavor uses its axe-like arms to chop through thick tree trunks to make its nest. It is very aggressive toward anyone who approaches its territory.",
         evolutions: ["Scyther", "Kleavor"],
         stats: { hp: 70, attack: 135, defense: 95, speed: 75 }
@@ -80,13 +87,46 @@
         img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/658.png",
         type: "Water/Dark",
         number: 658,
+        cry: "https://play.pokemonshowdown.com/audio/cries/greninja.mp3",
         description: "Greninja is known to create throwing stars out of compressed water. It throws them with such accuracy that they can hit a target from over a mile away.",
         evolutions: ["Froakie", "Frogadier", "Greninja"],
         stats: { hp: 72, attack: 95, defense: 67, speed: 122 }
-    }
+    },
+    {
+        name: "Amped form Toxtricity",
+        img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/849.png",
+        type: "Electric/Poison",
+        number: 849,
+        cry: "https://play.pokemonshowdown.com/audio/cries/toxtricity.mp3",
+        description: "Toxtricity has a highly developed sense of rhythm. It generates electricity by strumming its spiky chest, which it uses to shock its opponents.",
+        evolutions: ["Toxel", "Toxtricity"],
+        stats: { hp: 75, attack: 98, defense: 70, speed: 75 }
+    },
 ];
+    // fallback: real pokedex numbers when not in your pokemon[] list
+const pokeNumbers = {
+    "pichu": 172,
+    "pikachu": 25,
+    "raichu": 26,
+    "ivysaur": 2,
+    "venusaur": 3,
+    "monferno": 391,
+    "infernape": 392,
+    "frogadier": 657,
+    "froakie": 656,
+    "charmeleon": 5,
+    "charmander": 4,
+    "charizard": 6,
+    "scizor": 212,
+    "toxtricity": 849,
+    "toxel": 848,
+};
 
     let index = 0;
+
+    function getSprite(number) {
+        return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${number}.png`;
+    }
 
     function addPokemon() {
         if (index < pokemon.length) {
@@ -155,12 +195,45 @@ const evoTitle = document.createElement("h3");
 evoTitle.textContent = "Evolution Line";
 back.appendChild(evoTitle);
 
-entry.evolutions.forEach(ev => {
-    const evo = document.createElement("p");
-    evo.textContent = "→ " + ev;
-    evo.classList.add("evo-step");
-    back.appendChild(evo);
+// Evolution chain container
+const evoContainer = document.createElement("div");
+evoContainer.classList.add("evo-container");
+
+entry.evolutions.forEach((ev, i) => {
+    const evoBox = document.createElement("div");
+    evoBox.classList.add("evo-box");
+
+    const evoImg = document.createElement("img");
+    evoImg.classList.add("evo-sprite");
+
+    // find Pokémon in your main list
+    let evoData = pokemon.find(p => p.name.toLowerCase() === ev.toLowerCase());
+
+    // otherwise use fallback numbers
+    let evoNumber = evoData ? evoData.number : pokeNumbers[ev.toLowerCase()];
+
+    if (evoNumber) {
+        evoImg.src = getSprite(evoNumber);
+    } else {
+        evoImg.src = "";
+    }
+
+    const evoLabel = document.createElement("p");
+    evoLabel.textContent = ev;
+
+    evoBox.appendChild(evoImg);
+    evoBox.appendChild(evoLabel);
+    evoContainer.appendChild(evoBox);
+
+    if (i < entry.evolutions.length - 1) {
+        const arrow = document.createElement("span");
+        arrow.textContent = "→";
+        arrow.classList.add("evo-arrow");
+        evoContainer.appendChild(arrow);
+    }
 });
+
+back.appendChild(evoContainer);
 
 // Stats section (MOVED OUTSIDE evo loop)
 const statTitle = document.createElement("h3");
@@ -182,7 +255,7 @@ Object.keys(stats).forEach(statName => {
 
     const fill = document.createElement("div");
     fill.classList.add("stat-fill");
-    fill.style.width = stats[statName] + "%";
+    fill.style.setProperty("--stat-value", stats[statName] + "%");
 
     bar.appendChild(fill);
     row.appendChild(label);
@@ -201,6 +274,14 @@ Object.keys(stats).forEach(statName => {
             // append to DOM
             pokedex.appendChild(card);
             card.onclick = () => openModal(entry);
+
+            // NEW CODE: animate stats when hovered
+            card.addEventListener("mouseenter", () => {
+             card.classList.add("show-stats");
+}); 
+            card.addEventListener("mouseleave", () => {
+              card.classList.remove("show-stats");
+});
 
             // update index and (optionally) re-run search so new card hides if search active
             index++;
@@ -234,6 +315,10 @@ Object.keys(stats).forEach(statName => {
             document.getElementById("modal-types").textContent = "Type: " + entry.type;
             document.getElementById("modal-description").textContent = entry.description;
             document.getElementById("modal").style.display = "flex";
+
+            // play cry
+            crySound.src = entry.cry;
+            crySound.play();
         }
 
         function closeModal() {
