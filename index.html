@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pokemon encyclopedia</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Pokemon Encyclopedia</h1>
+        <p>list of my favourite pokemon</p>
+
+        <input id="search" type="text" placeholder="Search pokemon..." onkeyup="searchPokemon()">
+
+        <ul id="pokemon-list"></ul>
+        <div id="pokedex"></div>
+        <img src="kleavor.png" class="my-photo" alt="My Picture">
+        <button onclick="showfact()">show a fun fact</button>
+        <button onclick="addPokemon()">Add a Pokemon</button>
+        <button onclick="addPokedexEntry()">Add Pokedex Entry</button>
+<script>
+    function showfact() {
+        alert("Kleavor is a Bug/Rock type Pokemon introduced in Generation 8. It evolves from Scyther when exposed to a Black Augurite.");
+    }
+    const pokemon = [
+    {
+        name: "Pikachu",
+        img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png",
+        type: "Electric",
+        number: 25,
+        description: "Pikachu that can generate powerful electricity have cheek sacs that are extra soft and super stretchy.",
+        evolutions: ["Pichu", "Raichu"],
+        stats: { hp: 35, attack: 55, defense: 40, speed: 90 }
+    },
+    {
+        name: "Charizard",
+        img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png",
+        type: "Fire/Flying",
+        number: 6,
+        description: "Charizard flies around the sky in search of powerful opponents. It breathes fire of such great heat that it melts anything.",
+        evolutions: ["Charmander", "Charmeleon", "Charizard"],
+        stats: { hp: 78, attack: 84, defense: 78, speed: 100 }
+    },
+    {
+        name: "Bulbasaur",
+        img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
+        type: "Grass/Poison",
+        number: 1,
+        description: "Bulbasaur can be seen napping in bright sunlight. There is a seed on its back. By soaking up the sun's rays, the seed grows progressively larger.",
+        evolutions: ["Bulbasaur", "Ivysaur", "Venusaur"],
+        stats: { hp: 45, attack: 49, defense: 49, speed: 45 }
+    },
+    {
+        name: "chimchar",
+        img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/390.png",
+        type: "Fire",
+        number: 390,
+        description: "The flame that burns at the tip of its tail is an indication of its emotions. The flame wavers when Chimchar is enjoying itself. If the Pokémon becomes enraged, the flame burns fiercely.",
+        evolutions: ["Chimchar", "Monferno", "Infernape"],
+        stats: { hp: 44, attack: 58, defense: 44, speed: 61 }
+    },
+    {
+        name: "Scyther",
+        img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/123.png",
+        type: "Bug/Flying",
+        number: 123,
+        description: "Scyther is blindingly fast. It can slice through thick tree trunks in a single swing of its scythes. It is very territorial.",
+        evolutions: ["Scyther", "Kleavor"],
+        stats: { hp: 70, attack: 110, defense: 80, speed: 105 }
+    },
+    {
+        name: "Kleavor",
+        img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/900.png",
+        type: "Bug/Rock",
+        number: 900,
+        description: "Kleavor uses its axe-like arms to chop through thick tree trunks to make its nest. It is very aggressive toward anyone who approaches its territory.",
+        evolutions: ["Scyther", "Kleavor"],
+        stats: { hp: 70, attack: 135, defense: 95, speed: 75 }
+    },
+    {
+        name: "greninja",
+        img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/658.png",
+        type: "Water/Dark",
+        number: 658,
+        description: "Greninja is known to create throwing stars out of compressed water. It throws them with such accuracy that they can hit a target from over a mile away.",
+        evolutions: ["Froakie", "Frogadier", "Greninja"],
+        stats: { hp: 72, attack: 95, defense: 67, speed: 122 }
+    }
+];
+
+    let index = 0;
+
+    function addPokemon() {
+        if (index < pokemon.length) {
+            const list = document.getElementById("pokemon-list");
+            const listItem = document.createElement("li");
+            listItem.textContent = pokemon[index].name;
+            list.appendChild(listItem);
+            index++;
+        } else {
+            alert("All pokemon have been added!");
+        }
+    }   
+
+   function addPokedexEntry() {
+    if (index < pokemon.length) {
+        try {
+            const entry = pokemon[index];
+            const pokedex = document.getElementById("pokedex");
+
+            // make a card container
+            const card = document.createElement("div");
+            card.classList.add("card");
+            const mainType = entry.type.split("/")[0].toLowerCase();
+            card.classList.add(mainType + "-glow");
+
+            // inner wrapper for flipping
+            const inner = document.createElement("div");
+            inner.classList.add("card-inner");
+
+            // front
+            const front = document.createElement("div");
+            front.classList.add("card-front");
+
+            // dex number (always prepend so it stays inside the front)
+            const number = document.createElement("p");
+            number.classList.add("dex-number");
+            number.textContent = "#" + (entry.number ? entry.number.toString().padStart(3, "0") : "000");
+            front.prepend(number); // ensures number is at top of front
+
+            // name
+            const name = document.createElement("h3");
+            name.textContent = entry.name;
+            front.appendChild(name);
+
+            // image
+            const img = document.createElement("img");
+            img.src = entry.img;
+            img.style.width = "100px";
+            front.appendChild(img);
+
+            // types (allow multiple)
+            const types = (entry.type || "").split("/");
+            types.forEach(t => {
+                const badge = document.createElement("span");
+                badge.classList.add("type-badge", t.trim().toLowerCase());
+                badge.textContent = t.trim();
+                front.appendChild(badge);
+            });
+
+           // back of card
+const back = document.createElement("div");
+back.classList.add("card-back");
+
+// Evolution section
+const evoTitle = document.createElement("h3");
+evoTitle.textContent = "Evolution Line";
+back.appendChild(evoTitle);
+
+entry.evolutions.forEach(ev => {
+    const evo = document.createElement("p");
+    evo.textContent = "→ " + ev;
+    evo.classList.add("evo-step");
+    back.appendChild(evo);
+});
+
+// Stats section (MOVED OUTSIDE evo loop)
+const statTitle = document.createElement("h3");
+statTitle.textContent = "Stats";
+back.appendChild(statTitle);
+
+const stats = entry.stats;
+
+Object.keys(stats).forEach(statName => {
+    const row = document.createElement("div");
+    row.classList.add("stat-row");
+
+    const label = document.createElement("span");
+    label.classList.add("stat-label");
+    label.textContent = statName.toUpperCase();
+
+    const bar = document.createElement("div");
+    bar.classList.add("stat-bar");
+
+    const fill = document.createElement("div");
+    fill.classList.add("stat-fill");
+    fill.style.width = stats[statName] + "%";
+
+    bar.appendChild(fill);
+    row.appendChild(label);
+    row.appendChild(bar);
+    back.appendChild(row);
+});
+
+            // assemble
+            inner.appendChild(front);
+            inner.appendChild(back);
+            card.appendChild(inner);
+
+            // clicking opens modal (if you added modal)
+            if (typeof openModal === "function") card.onclick = () => openModal(entry);
+
+            // append to DOM
+            pokedex.appendChild(card);
+            card.onclick = () => openModal(entry);
+
+            // update index and (optionally) re-run search so new card hides if search active
+            index++;
+            if (typeof searchPokemon === "function") searchPokemon();
+        } catch (err) {
+            console.error("Failed to create pokedex card:", err);
+            alert("There was an error creating a Pokédex card — check the console (F12).");
+        }
+    } else {
+        alert("All pokemon have been added!");
+    }
+}
+        function searchPokemon() {
+            const input = document.getElementById("search").value.toLowerCase();
+            const cards = document.querySelectorAll("#pokedex .card");
+
+            cards.forEach(card => {
+                const name = card.querySelector(".card-front h3").textContent.toLowerCase();
+                if (name.includes(input)) {
+                    card.style.display = "block";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        }
+
+        function openModal(entry) {
+            document.getElementById("modal-name").textContent = entry.name;
+            document.getElementById("modal-number").textContent = "#" + entry.number;
+            document.getElementById("modal-img").src = entry.img;
+            document.getElementById("modal-types").textContent = "Type: " + entry.type;
+            document.getElementById("modal-description").textContent = entry.description;
+            document.getElementById("modal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("modal").style.display = "none";
+        }
+    </script>   
+
+    <div id="modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">×</span>
+        <h2 id="modal-name"></h2>
+        <p id="modal-number"></p>
+        <img id="modal-img" src="" alt="">
+        <p id="modal-types"></p>
+        <p id="modal-description"></p>
+    </div>
+</div>
+</body>
+</html>
